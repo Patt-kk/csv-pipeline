@@ -1604,7 +1604,7 @@ async function previewChart() {
   if (!xCol) return;
 
   try {
-    let sql, data, layout;
+    let sql, data, layout, xs = null;
     const safeX = `"${xCol}"`;
     const safeY = yCol && yCol !== '*' ? `"${yCol}"` : null;
     const limitClause = lim > 0 ? `LIMIT ${lim}` : '';
@@ -1674,8 +1674,9 @@ async function previewChart() {
     }
 
     // Common layout settings
+    const bottomMargin = xs && xs.length > 10 ? 90 : 50;
     const plotLayout = Object.assign({
-      margin: { t: 18, r: 18, b: xs ? (xs.length > 10 ? 90 : 50) : 50, l: 55 },
+      margin: { t: 18, r: 18, b: bottomMargin, l: 55 },
       paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
       font: { family: 'IBM Plex Mono, monospace', size: 11, color: '#6b6960' },
       showlegend: _chartType === 'pie',
