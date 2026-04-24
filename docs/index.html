@@ -233,10 +233,81 @@
 
     .hidden { display: none !important; }
 
+    /* ── Stage 3: Transform ── */
+    .transform-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .tx-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 14px 16px; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+      position: relative;
+    }
+    .tx-card:hover { border-color: var(--border2); background: var(--surface); }
+    .tx-card.active { border-color: var(--teal); background: var(--teal-light); }
+    .tx-card.applied { border-color: #9FE1CB; }
+    .tx-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+    .tx-desc { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+    .tx-badge {
+      position: absolute; top: 10px; right: 10px;
+      font-family: var(--mono); font-size: 9px; padding: 2px 6px;
+      border-radius: 3px; letter-spacing: 0.05em;
+    }
+    .tx-badge.auto { background: var(--teal-light); color: var(--teal-dark); }
+    .tx-badge.done { background: #E1F5EE; color: #085041; }
+
+    .recipe-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .recipe-item {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      padding: 10px 14px; font-family: var(--mono); font-size: 12px;
+    }
+    .recipe-item .ri-num {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--surface); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; color: var(--muted); flex-shrink: 0;
+    }
+    .recipe-item .ri-sql { flex: 1; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .recipe-item .ri-del {
+      background: none; border: none; color: var(--hint); cursor: pointer;
+      font-size: 14px; padding: 0 2px; line-height: 1;
+    }
+    .recipe-item .ri-del:hover { color: var(--red); }
+
+    .col-select-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 6px; margin: 10px 0 14px; }
+    .col-toggle {
+      display: flex; align-items: center; gap: 7px;
+      padding: 7px 10px; border-radius: 5px; cursor: pointer;
+      background: var(--bg); border: 1px solid var(--border);
+      font-family: var(--mono); font-size: 11px; color: var(--muted);
+      transition: all 0.15s; user-select: none;
+    }
+    .col-toggle.on { background: var(--teal-light); border-color: #9FE1CB; color: var(--teal-dark); }
+    .col-toggle .ct-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
+    .col-toggle.on .ct-dot { background: var(--teal); }
+
+    .clean-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+
+    .tab-row { display: flex; gap: 2px; margin-bottom: 14px; border-bottom: 1px solid var(--border); }
+    .tab {
+      padding: 8px 14px; font-family: var(--mono); font-size: 11px; cursor: pointer;
+      color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .view-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #EEEDFE; border: 1px solid #AFA9EC; border-radius: 4px;
+      padding: 2px 9px; font-family: var(--mono); font-size: 11px; color: #3C3489;
+    }
+
     /* ── Responsive ── */
     @media (max-width: 600px) {
       .stats-row { grid-template-columns: repeat(2, 1fr); }
       .pipeline-steps { display: none; }
+      .transform-grid { grid-template-columns: 1fr; }
+      .clean-stats { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
@@ -374,7 +445,87 @@
         and create a <code style="font-family:var(--mono);font-size:12px">clean_data</code> view ready for dashboarding.
       </p>
       <div class="btn-row">
-        <button class="btn btn-primary" onclick="proceedToStage3()">Continue to Stage 3 → Transform</button>
+        <button class="btn btn-primary" onclick="showStage3()">Continue to Stage 3 → Transform</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage 3 divider -->
+  <div class="stage-divider" id="divider3" style="display:none">STAGE 3 · TRANSFORM</div>
+
+  <!-- ════════════════════════════════
+       STAGE 3 — SQL TRANSFORMS
+  ════════════════════════════════ -->
+  <div id="stage3" class="hidden">
+    <div class="stage-badge"><span class="dot" style="background:#EF9F27"></span>STAGE 3 · TRANSFORM</div>
+    <div class="stage-heading">Clean &amp; shape your data</div>
+    <div class="stage-sub">Build a transform recipe — each step is a SQL operation on <span class="view-pill">raw_data</span>. The result becomes <span class="view-pill">clean_data</span>.</div>
+
+    <!-- Auto-suggestions -->
+    <div class="card" id="suggestCard">
+      <div class="card-title">Auto-detected transforms <span style="color:var(--teal);font-size:10px;margin-left:6px">based on your columns</span></div>
+      <div class="transform-grid" id="transformGrid"></div>
+    </div>
+
+    <!-- Custom SQL transform -->
+    <div class="card">
+      <div class="card-title">Custom SQL transform</div>
+      <textarea class="sql-input" id="txSqlInput" style="min-height:64px" placeholder="e.g.  CAST(&quot;price&quot; AS DOUBLE)  or  TRIM(LOWER(&quot;email&quot;))  or  REPLACE(&quot;phone&quot;, '-', '')"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap">
+        <input id="txAliasInput" placeholder="column alias (e.g. price_clean)" style="font-family:var(--mono);font-size:12px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);outline:none;width:220px">
+        <button class="btn btn-outline" onclick="addCustomTransform()">+ Add to recipe</button>
+      </div>
+      <div class="sql-hint" style="margin-top:6px">Expression is added as a SELECT column. Alias becomes the new column name.</div>
+    </div>
+
+    <!-- Column selector -->
+    <div class="card">
+      <div class="card-title">Select columns to keep in clean_data</div>
+      <div class="col-select-grid" id="colSelectGrid"></div>
+      <div class="btn-row" style="margin-top:4px">
+        <button class="btn btn-outline" onclick="toggleAllCols(true)">Select all</button>
+        <button class="btn btn-outline" onclick="toggleAllCols(false)">Deselect all</button>
+      </div>
+    </div>
+
+    <!-- Recipe -->
+    <div class="card">
+      <div class="card-title">Transform recipe <span id="recipeCount" style="color:var(--muted)">0 steps</span></div>
+      <div id="recipeList" class="recipe-list">
+        <div style="font-family:var(--mono);font-size:12px;color:var(--hint);padding:8px 0">No transforms added yet — add suggestions above or write a custom one.</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="runTransformBtn" onclick="runTransforms()">▶ Build clean_data view</button>
+        <button class="btn btn-outline" onclick="clearRecipe()">Clear recipe</button>
+      </div>
+    </div>
+
+    <!-- Transform results -->
+    <div class="card hidden" id="cleanCard">
+      <div class="card-title">clean_data preview</div>
+
+      <div class="clean-stats" id="cleanStats"></div>
+
+      <!-- Tabs -->
+      <div class="tab-row">
+        <div class="tab active" onclick="switchTab('preview')">Preview</div>
+        <div class="tab" onclick="switchTab('sql')">Generated SQL</div>
+        <div class="tab" onclick="switchTab('profile')">Column profile</div>
+      </div>
+
+      <div class="tab-panel active" id="tab-preview">
+        <div class="table-wrap"><table id="cleanTable"></table></div>
+      </div>
+      <div class="tab-panel" id="tab-sql">
+        <pre id="generatedSQL" style="background:#1a1a18;color:#e8e6df;padding:16px;border-radius:8px;font-size:12px;line-height:1.7;overflow-x:auto;white-space:pre-wrap"></pre>
+      </div>
+      <div class="tab-panel" id="tab-profile">
+        <div id="colProfile"></div>
+      </div>
+
+      <div class="btn-row" style="margin-top:16px">
+        <button class="btn btn-primary" onclick="showStage4()">Continue to Stage 4 → Dashboard</button>
+        <button class="btn btn-outline" onclick="exportCSV()">Export clean_data as CSV</button>
       </div>
     </div>
   </div>
@@ -715,8 +866,292 @@ function setQuery(q) {
 
 document.getElementById('runSqlBtn').addEventListener('click', runSQL);
 
-function proceedToStage3() {
-  alert('Stage 3 coming next! We will add SQL transforms to clean your data.');
+function showStage3() {
+  document.getElementById('divider3').style.display = '';
+  document.getElementById('stage3').classList.remove('hidden');
+  document.getElementById('nav2').className = 'pipe-step done';
+  document.getElementById('nav3').className = 'pipe-step active';
+  buildTransformUI();
+  buildColSelector();
+  document.getElementById('stage3').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── STAGE 3: SQL Transforms ───────────────────────────
+let _recipe = [];          // array of { id, label, expr, alias }
+let _selectedCols = new Set();
+let _cleanCols = [];
+
+function buildTransformUI() {
+  const cols = _parsedData.cols;
+  const suggestions = [];
+
+  cols.forEach(c => {
+    const t = _colTypes[c];
+    const safe = `"${c}"`;
+
+    if (t === 'string') {
+      suggestions.push({
+        id: `trim_${c}`, label: `Trim & lowercase`, col: c,
+        desc: `TRIM(LOWER(${safe}))`, alias: `${c}_clean`,
+        tag: 'auto'
+      });
+    }
+    if (t === 'number') {
+      suggestions.push({
+        id: `cast_${c}`, label: `Cast to number`, col: c,
+        desc: `TRY_CAST(${safe} AS DOUBLE)`, alias: c,
+        tag: 'auto'
+      });
+    }
+    if (t === 'date') {
+      suggestions.push({
+        id: `date_${c}`, label: `Parse as date`, col: c,
+        desc: `TRY_CAST(${safe} AS DATE)`, alias: `${c}_date`,
+        tag: 'auto'
+      });
+    }
+    if (t === 'string' && c.toLowerCase().includes('email')) {
+      suggestions.push({
+        id: `email_${c}`, label: `Normalize email`, col: c,
+        desc: `LOWER(TRIM(${safe}))`, alias: `${c}_norm`,
+        tag: 'auto'
+      });
+    }
+  });
+
+  // Always add null-drop suggestion
+  suggestions.push({
+    id: 'drop_nulls', label: 'Filter out null rows', col: null,
+    desc: `Add WHERE clause to drop rows where all selected cols are NULL`,
+    alias: null, tag: 'auto', isFilter: true
+  });
+
+  suggestions.push({
+    id: 'dedup', label: 'Remove duplicates', col: null,
+    desc: 'SELECT DISTINCT on all kept columns',
+    alias: null, tag: 'auto', isDistinct: true
+  });
+
+  const grid = document.getElementById('transformGrid');
+  grid.innerHTML = suggestions.slice(0, 8).map(s => `
+    <div class="tx-card" id="txc_${s.id}" onclick="toggleSuggestion(${JSON.stringify(s).replace(/"/g,'&quot;')})">
+      <span class="tx-badge auto">${s.tag}</span>
+      <div class="tx-title">${s.label}${s.col ? ` · <span style="color:var(--teal);font-size:11px">${s.col}</span>` : ''}</div>
+      <div class="tx-desc">${s.desc}</div>
+    </div>`
+  ).join('');
+}
+
+function toggleSuggestion(s) {
+  const el = document.getElementById('txc_' + s.id);
+  const existing = _recipe.findIndex(r => r.id === s.id);
+  if (existing >= 0) {
+    _recipe.splice(existing, 1);
+    el.classList.remove('active');
+  } else {
+    _recipe.push(s);
+    el.classList.add('active');
+  }
+  renderRecipe();
+}
+
+function addCustomTransform() {
+  const expr = document.getElementById('txSqlInput').value.trim();
+  const alias = document.getElementById('txAliasInput').value.trim();
+  if (!expr) return;
+  const id = 'custom_' + Date.now();
+  _recipe.push({ id, label: 'Custom', col: null, desc: expr, alias: alias || 'col_' + (_recipe.length+1), tag: 'custom' });
+  renderRecipe();
+  document.getElementById('txSqlInput').value = '';
+  document.getElementById('txAliasInput').value = '';
+}
+
+function renderRecipe() {
+  const list = document.getElementById('recipeList');
+  document.getElementById('recipeCount').textContent = _recipe.length + ' step' + (_recipe.length !== 1 ? 's' : '');
+  if (!_recipe.length) {
+    list.innerHTML = '<div style="font-family:var(--mono);font-size:12px;color:var(--hint);padding:8px 0">No transforms added yet.</div>';
+    return;
+  }
+  list.innerHTML = _recipe.map((r, i) => `
+    <div class="recipe-item">
+      <span class="ri-num">${i+1}</span>
+      <span class="ri-sql">${r.label}${r.col ? ' · '+r.col : ''}${r.alias ? ' → '+r.alias : ''}</span>
+      <button class="ri-del" onclick="removeRecipe('${r.id}')">×</button>
+    </div>`).join('');
+}
+
+function removeRecipe(id) {
+  _recipe = _recipe.filter(r => r.id !== id);
+  const el = document.getElementById('txc_' + id);
+  if (el) el.classList.remove('active');
+  renderRecipe();
+}
+
+function clearRecipe() {
+  _recipe = [];
+  document.querySelectorAll('.tx-card').forEach(e => e.classList.remove('active'));
+  renderRecipe();
+}
+
+function buildColSelector() {
+  const cols = _parsedData.cols;
+  _selectedCols = new Set(cols);
+  const grid = document.getElementById('colSelectGrid');
+  const typeClass = {number:'t-num',string:'t-str',date:'t-date',boolean:'t-bool',null:'t-null'};
+  grid.innerHTML = cols.map(c => `
+    <div class="col-toggle on" id="ct_${CSS.escape(c)}" onclick="toggleCol('${c.replace(/'/g,"\\'")}')">
+      <span class="ct-dot"></span>${c}
+    </div>`).join('');
+}
+
+function toggleCol(c) {
+  const el = document.getElementById('ct_' + CSS.escape(c));
+  if (_selectedCols.has(c)) { _selectedCols.delete(c); el.classList.remove('on'); }
+  else { _selectedCols.add(c); el.classList.add('on'); }
+}
+
+function toggleAllCols(on) {
+  _parsedData.cols.forEach(c => {
+    const el = document.getElementById('ct_' + CSS.escape(c));
+    if (on) { _selectedCols.add(c); el && el.classList.add('on'); }
+    else { _selectedCols.delete(c); el && el.classList.remove('on'); }
+  });
+}
+
+async function runTransforms() {
+  if (!_conn) return;
+  const btn = document.getElementById('runTransformBtn');
+  btn.textContent = '⏳ Building…'; btn.disabled = true;
+
+  try {
+    const cols = [..._selectedCols];
+    const isDistinct = _recipe.some(r => r.isDistinct);
+
+    // Build SELECT list
+    // Start with pass-through columns, then override with transforms
+    const transformMap = {};
+    _recipe.forEach(r => {
+      if (!r.isFilter && !r.isDistinct && r.alias) {
+        transformMap[r.alias] = r.desc;
+      }
+    });
+
+    // Columns: selected pass-through + transformed versions
+    const selectParts = cols.map(c => {
+      // Check if any recipe transforms this column
+      const txAlias = Object.keys(transformMap).find(a => a === c);
+      if (txAlias) return `${transformMap[txAlias]} AS "${c}"`;
+      return `"${c}"`;
+    });
+
+    // Add new alias columns that don't replace existing ones
+    Object.entries(transformMap).forEach(([alias, expr]) => {
+      if (!cols.includes(alias)) {
+        selectParts.push(`${expr} AS "${alias}"`);
+      }
+    });
+
+    const distinct = isDistinct ? 'DISTINCT ' : '';
+    const whereNullFilter = _recipe.some(r => r.isFilter)
+      ? `WHERE ` + cols.slice(0,3).map(c => `"${c}" IS NOT NULL`).join(' OR ')
+      : '';
+
+    const sql = `CREATE OR REPLACE VIEW clean_data AS\nSELECT ${distinct}\n  ${selectParts.join(',\n  ')}\nFROM raw_data\n${whereNullFilter}`.trim();
+
+    await _conn.query(sql);
+
+    // Verify
+    const countRes = await _conn.query('SELECT COUNT(*) as n FROM clean_data');
+    const cleanCount = Number(countRes.toArray()[0].n);
+
+    const rawCount = Number((await _conn.query('SELECT COUNT(*) as n FROM raw_data')).toArray()[0].n);
+    const previewRes = await _conn.query('SELECT * FROM clean_data LIMIT 20');
+    const previewRows = previewRes.toArray();
+    _cleanCols = previewRes.schema.fields.map(f => f.name);
+
+    // Stats
+    document.getElementById('cleanStats').innerHTML = `
+      <div class="stat-card"><div class="stat-label">ROWS</div><div class="stat-value ok">${cleanCount.toLocaleString()}</div></div>
+      <div class="stat-card"><div class="stat-label">COLUMNS</div><div class="stat-value">${_cleanCols.length}</div></div>
+      <div class="stat-card"><div class="stat-label">ROWS REMOVED</div><div class="stat-value ${rawCount-cleanCount>0?'warn':'ok'}">${(rawCount-cleanCount).toLocaleString()}</div></div>`;
+
+    // Preview table
+    document.getElementById('cleanTable').innerHTML = `
+      <thead><tr>${_cleanCols.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+      <tbody>${previewRows.map(row =>
+        `<tr>${_cleanCols.map(c => {
+          const v = row[c]; const empty = v === null || v === undefined;
+          return `<td class="${empty?'null':''}">${empty?'null':String(v)}</td>`;
+        }).join('')}</tr>`).join('')}</tbody>`;
+
+    // Generated SQL
+    document.getElementById('generatedSQL').textContent = sql;
+
+    // Column profile
+    const profileParts = await Promise.all(_cleanCols.slice(0,8).map(async c => {
+      try {
+        const r = await _conn.query(`SELECT COUNT(*) as total, COUNT("${c}") as non_null, COUNT(DISTINCT "${c}") as unique_vals FROM clean_data`);
+        const s = r.toArray()[0];
+        const total = Number(s.total), nonNull = Number(s.non_null), uniq = Number(s.unique_vals);
+        const nullPct = total > 0 ? (((total-nonNull)/total)*100).toFixed(1) : '0';
+        return `<div class="schema-col">
+          <div class="schema-name">${c}</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px;line-height:1.8">
+            non-null: ${nonNull.toLocaleString()}<br>
+            nulls: ${nullPct}%<br>
+            distinct: ${uniq.toLocaleString()}
+          </div>
+        </div>`;
+      } catch { return ''; }
+    }));
+    document.getElementById('colProfile').innerHTML = `<div class="schema-grid">${profileParts.join('')}</div>`;
+
+    document.getElementById('cleanCard').classList.remove('hidden');
+    document.getElementById('cleanCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  } catch (err) {
+    document.getElementById('cleanCard').classList.remove('hidden');
+    document.getElementById('cleanStats').innerHTML = `<div class="alert error" style="grid-column:1/-1">✕ ${err.message}</div>`;
+    console.error('Transform error:', err);
+  }
+  btn.textContent = '▶ Build clean_data view'; btn.disabled = false;
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const names = ['preview','sql','profile'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.classList.toggle('active', p.id === 'tab-'+name);
+  });
+}
+
+async function exportCSV() {
+  if (!_conn) return;
+  try {
+    const res = await _conn.query('SELECT * FROM clean_data');
+    const rows = res.toArray();
+    const cols = res.schema.fields.map(f => f.name);
+    const csv = [cols.join(','), ...rows.map(r =>
+      cols.map(c => {
+        const v = r[c];
+        if (v === null || v === undefined) return '';
+        const s = String(v);
+        return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g,'""')}"` : s;
+      }).join(',')
+    )].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'clean_data.csv';
+    a.click();
+  } catch (err) { alert('Export error: ' + err.message); }
+}
+
+function showStage4() {
+  alert('Stage 4 coming next — Pyodide + Plotly dashboard!');
 }
 
 // ── Boot ──────────────────────────────────────────────
