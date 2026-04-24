@@ -400,6 +400,80 @@
     .pinned-del { background: none; border: none; cursor: pointer; color: var(--hint); font-size: 13px; line-height: 1; padding: 0; }
     .pinned-del:hover { color: var(--red); }
 
+    /* ── Stage 5: AI Analysis ── */
+    .ai-key-row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+    .ai-key-input {
+      flex: 1; padding: 8px 12px; background: var(--bg); color: var(--text);
+      border: 1px solid var(--border); border-radius: 6px;
+      font-family: var(--mono); font-size: 12px; outline: none; transition: border-color 0.2s;
+    }
+    .ai-key-input:focus { border-color: var(--teal); }
+    .ai-key-input::placeholder { color: var(--hint); }
+    .ai-model-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .ai-model-pill {
+      padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border);
+      font-family: var(--mono); font-size: 10px; cursor: pointer;
+      color: var(--muted); background: var(--surface); transition: all 0.15s; white-space: nowrap;
+    }
+    .ai-model-pill:hover { border-color: var(--border2); color: var(--text); }
+    .ai-model-pill.active { background: #EEEDFE; border-color: #7F77DD; color: #3C3489; font-weight: 500; }
+    .ai-ctx-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
+    .ai-ctx-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 7px;
+      padding: 10px 12px; cursor: pointer; transition: all 0.15s;
+    }
+    .ai-ctx-card:hover { border-color: var(--border2); background: var(--surface); }
+    .ai-ctx-card.active { border-color: #7F77DD; background: #EEEDFE; }
+    .ai-ctx-title { font-size: 12px; font-weight: 500; margin-bottom: 2px; color: var(--text); }
+    .ai-ctx-desc { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+    .ai-ctx-card.active .ai-ctx-desc { color: #534AB7; }
+    .ai-prompt-input {
+      width: 100%; min-height: 68px; background: #1a1a18; color: #e8e6df;
+      border: 1px solid #333; border-radius: 8px;
+      font-family: var(--mono); font-size: 12px; line-height: 1.7;
+      padding: 11px 14px; resize: vertical; outline: none; transition: border-color 0.2s;
+    }
+    .ai-prompt-input:focus { border-color: var(--purple); }
+    .ai-prompt-input::placeholder { color: #555; }
+    .ai-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 14px; }
+    .ai-chip {
+      padding: 5px 11px; border-radius: 20px; border: 1px solid var(--border);
+      font-size: 11px; cursor: pointer; color: var(--muted); background: var(--surface);
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .ai-chip:hover { border-color: var(--purple); color: var(--purple); background: #EEEDFE; }
+    .ai-output-wrap { margin-top: 14px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .ai-output-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 14px; border-bottom: 1px solid var(--border); background: var(--bg);
+    }
+    .ai-output-meta { font-family: var(--mono); font-size: 10px; color: var(--hint); }
+    .ai-output-body {
+      padding: 16px 18px; font-size: 13px; line-height: 1.75;
+      color: var(--text); min-height: 60px; white-space: pre-wrap;
+    }
+    .ai-output-body strong { font-weight: 500; }
+    .ai-output-body code { font-family: var(--mono); font-size: 11px; background: var(--bg); padding: 1px 5px; border-radius: 3px; }
+    .ai-cursor { display: inline-block; width: 2px; height: 1em; background: var(--purple); margin-left: 2px; animation: aiblink 0.8s steps(1) infinite; vertical-align: text-bottom; }
+    @keyframes aiblink { 0%,100%{opacity:1} 50%{opacity:0} }
+    .ai-history { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+    .ai-hist-item { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .ai-hist-q {
+      padding: 8px 13px; background: var(--bg);
+      font-family: var(--mono); font-size: 11px; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .ai-hist-q-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ai-hist-del { background: none; border: none; cursor: pointer; color: var(--hint); font-size: 12px; padding: 0; flex-shrink: 0; }
+    .ai-hist-del:hover { color: var(--red); }
+    .ai-hist-a { padding: 12px 16px; font-size: 13px; line-height: 1.7; color: var(--text); white-space: pre-wrap; }
+    .ai-data-peek {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      padding: 9px 12px; font-family: var(--mono); font-size: 10px; color: var(--muted);
+      line-height: 1.7; margin-bottom: 12px; max-height: 120px; overflow-y: auto;
+    }
+
     /* ── Responsive ── */
     @media (max-width: 700px) {
       .stats-row { grid-template-columns: repeat(2, 1fr); }
@@ -412,6 +486,7 @@
       .kpi-row { grid-template-columns: repeat(2, 1fr); }
       .dash-kpi-row { grid-template-columns: repeat(2, 1fr); }
       .pinned-grid { grid-template-columns: 1fr; }
+      .ai-ctx-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -735,6 +810,79 @@
   </div>
 
   </div><!-- /stage4 end placeholder -->
+
+  <!-- Stage 5 divider -->
+  <div class="stage-divider" id="divider5" style="display:none">STAGE 5 · ANALYZE</div>
+
+  <!-- ════════════════════════════════
+       STAGE 5 — GEMINI AI ANALYSIS
+  ════════════════════════════════ -->
+  <div id="stage5" class="hidden">
+    <div class="stage-badge"><span class="dot" style="background:#7F77DD"></span>STAGE 5 · ANALYZE</div>
+    <div class="stage-heading">AI analysis</div>
+    <div class="stage-sub">Ask Gemini questions about your data in plain English. It receives a smart summary of <span class="view-pill" style="background:#EEEDFE;border-color:#AFA9EC;color:#3C3489">clean_data</span> as context — no raw rows sent.</div>
+
+    <!-- API key -->
+    <div class="card">
+      <div class="card-title">Gemini API key <span style="color:var(--hint);font-weight:400;font-size:10px;margin-left:6px">free tier · stored only in your browser</span></div>
+      <div class="ai-key-row">
+        <input type="password" id="aiKeyInput" class="ai-key-input" placeholder="Paste your Gemini API key here — get one free at aistudio.google.com">
+        <button class="btn btn-outline" style="white-space:nowrap" onclick="saveApiKey()">Save key</button>
+        <span id="aiKeySaved" style="font-family:var(--mono);font-size:11px;color:var(--teal);display:none;white-space:nowrap">✓ saved</span>
+      </div>
+      <div class="cfg-label" style="margin-top:4px">Model</div>
+      <div class="ai-model-row" id="aiModelRow">
+        <div class="ai-model-pill active" data-model="gemini-2.0-flash" onclick="selectModel(this)">gemini-2.0-flash · fast</div>
+        <div class="ai-model-pill" data-model="gemini-2.5-flash-preview-05-20" onclick="selectModel(this)">gemini-2.5-flash · smart</div>
+        <div class="ai-model-pill" data-model="gemini-2.5-pro-preview-06-05" onclick="selectModel(this)">gemini-2.5-pro · best</div>
+      </div>
+    </div>
+
+    <!-- Data context -->
+    <div class="card">
+      <div class="card-title">What data to include as context</div>
+      <div class="ai-ctx-grid">
+        <div class="ai-ctx-card active" data-ctx="summary" onclick="selectCtx(this)">
+          <div class="ai-ctx-title">Summary stats</div>
+          <div class="ai-ctx-desc">Row count, col types, null rates, top values</div>
+        </div>
+        <div class="ai-ctx-card" data-ctx="sample" onclick="selectCtx(this)">
+          <div class="ai-ctx-title">Sample rows</div>
+          <div class="ai-ctx-desc">First 30 rows + summary stats</div>
+        </div>
+        <div class="ai-ctx-card" data-ctx="agg" onclick="selectCtx(this)">
+          <div class="ai-ctx-title">Aggregations</div>
+          <div class="ai-ctx-desc">Group-by counts for string cols + numeric stats</div>
+        </div>
+      </div>
+      <div class="ai-data-peek" id="aiDataPeek">Configure above and the context preview will appear here…</div>
+    </div>
+
+    <!-- Ask -->
+    <div class="card">
+      <div class="card-title">Ask a question</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Suggestions based on your columns:</p>
+      <div class="ai-chips" id="aiChips"></div>
+      <textarea class="ai-prompt-input" id="aiPrompt" placeholder="e.g. What are the main trends in this data? Which category has the highest values? Are there any anomalies?"></textarea>
+      <div class="btn-row" style="margin-top:10px">
+        <button class="btn btn-primary" id="aiRunBtn" onclick="runAI()" style="background:var(--purple);color:#EEEDFE">✦ Ask Gemini</button>
+        <button class="btn btn-outline" onclick="clearAiHistory()">Clear history</button>
+      </div>
+      <div id="aiError" class="alert error" style="display:none;margin-top:10px"></div>
+    </div>
+
+    <!-- Current response -->
+    <div id="aiOutputWrap" class="ai-output-wrap" style="display:none">
+      <div class="ai-output-head">
+        <span class="ai-output-meta" id="aiOutputMeta"></span>
+        <button class="btn btn-outline" style="padding:4px 10px;font-size:11px" onclick="copyAiResponse()">Copy</button>
+      </div>
+      <div class="ai-output-body" id="aiOutputBody"></div>
+    </div>
+
+    <!-- History -->
+    <div id="aiHistory" class="ai-history"></div>
+  </div>
 
 </div><!-- /main -->
 
@@ -1603,9 +1751,305 @@ function clearPinned() {
   document.getElementById('pinnedCard').style.display = 'none';
 }
 
+// ── STAGE 5: Gemini AI Analysis ──────────────────────
+let _aiKey = '';
+let _aiModel = 'gemini-2.0-flash';
+let _aiCtx = 'summary';
+let _aiHistory = [];
+let _aiContextCache = '';
+
 function showStage5() {
-  alert('Stage 5 coming next — Gemini AI analysis on your clean_data!');
+  document.getElementById('divider5').style.display = '';
+  document.getElementById('stage5').classList.remove('hidden');
+  document.getElementById('nav4').className = 'pipe-step done';
+  document.getElementById('nav5').className = 'pipe-step active';
+  buildAiChips();
+  buildAiContextPreview();
+  document.getElementById('stage5').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+function saveApiKey() {
+  const val = document.getElementById('aiKeyInput').value.trim();
+  if (!val) return;
+  _aiKey = val;
+  localStorage.setItem('_gemini_key', val);
+  document.getElementById('aiKeyInput').value = '';
+  const saved = document.getElementById('aiKeySaved');
+  saved.style.display = 'inline';
+  setTimeout(() => { saved.style.display = 'none'; }, 2500);
+}
+
+function selectModel(el) {
+  document.querySelectorAll('.ai-model-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  _aiModel = el.dataset.model;
+}
+
+function selectCtx(el) {
+  document.querySelectorAll('.ai-ctx-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  _aiCtx = el.dataset.ctx;
+  buildAiContextPreview();
+}
+
+function buildAiChips() {
+  if (!_cleanCols.length) return;
+  const numCols = _cleanCols.filter(c => _colTypes[c] === 'number');
+  const strCols = _cleanCols.filter(c => _colTypes[c] === 'string');
+
+  const suggestions = [
+    'What are the main trends in this dataset?',
+    'Are there any anomalies or outliers?',
+    'Summarise the key findings in 3 bullet points.',
+    'What columns are most correlated?',
+  ];
+  if (numCols.length) suggestions.push(`What is the distribution of ${numCols[0]}?`);
+  if (strCols.length) suggestions.push(`What are the most common values in ${strCols[0]}?`);
+  if (numCols.length && strCols.length) suggestions.push(`Compare ${numCols[0]} across different ${strCols[0]} categories.`);
+
+  document.getElementById('aiChips').innerHTML = suggestions.map(s =>
+    `<div class="ai-chip" onclick="useChip(this)">${s}</div>`
+  ).join('');
+}
+
+function useChip(el) {
+  document.getElementById('aiPrompt').value = el.textContent;
+}
+
+async function buildAiContextPreview() {
+  if (!_conn || !_cleanCols.length) return;
+  _aiContextCache = await buildAiContext();
+  // Show trimmed preview
+  const lines = _aiContextCache.split('\n').slice(0, 18).join('\n');
+  document.getElementById('aiDataPeek').textContent = lines + (_aiContextCache.split('\n').length > 18 ? '\n…' : '');
+}
+
+async function buildAiContext() {
+  const cols = _cleanCols;
+  const numCols = cols.filter(c => _colTypes[c] === 'number');
+  const strCols = cols.filter(c => _colTypes[c] === 'string');
+
+  // Always include schema
+  const countRes = await _conn.query('SELECT COUNT(*) as n FROM clean_data');
+  const totalRows = Number(countRes.toArray()[0].n);
+
+  let ctx = `DATASET OVERVIEW\n`;
+  ctx += `Total rows: ${totalRows.toLocaleString()}\n`;
+  ctx += `Columns (${cols.length}): ${cols.join(', ')}\n\n`;
+
+  // Numeric stats
+  if (numCols.length) {
+    ctx += `NUMERIC COLUMN STATS\n`;
+    for (const c of numCols.slice(0, 6)) {
+      try {
+        const r = await _conn.query(
+          `SELECT ROUND(MIN(TRY_CAST("${c}" AS DOUBLE)),2) as mn,
+                  ROUND(MAX(TRY_CAST("${c}" AS DOUBLE)),2) as mx,
+                  ROUND(AVG(TRY_CAST("${c}" AS DOUBLE)),2) as avg,
+                  COUNT("${c}") as cnt
+           FROM clean_data`
+        );
+        const s = r.toArray()[0];
+        ctx += `  ${c}: min=${s.mn}, max=${s.mx}, avg=${s.avg}, non-null=${Number(s.cnt).toLocaleString()}\n`;
+      } catch {}
+    }
+    ctx += '\n';
+  }
+
+  // String top values
+  if (strCols.length) {
+    ctx += `CATEGORICAL COLUMN TOP VALUES\n`;
+    for (const c of strCols.slice(0, 5)) {
+      try {
+        const r = await _conn.query(
+          `SELECT "${c}" as val, COUNT(*) as cnt FROM clean_data WHERE "${c}" IS NOT NULL GROUP BY "${c}" ORDER BY cnt DESC LIMIT 5`
+        );
+        const rows = r.toArray();
+        ctx += `  ${c}: ${rows.map(row => `${row.val}(${Number(row.cnt)})`).join(', ')}\n`;
+      } catch {}
+    }
+    ctx += '\n';
+  }
+
+  // Sample rows if requested
+  if (_aiCtx === 'sample') {
+    try {
+      const r = await _conn.query(`SELECT * FROM clean_data LIMIT 30`);
+      const rows = r.toArray();
+      ctx += `SAMPLE ROWS (first 30)\n`;
+      ctx += cols.join('\t') + '\n';
+      rows.forEach(row => {
+        ctx += cols.map(c => { const v = row[c]; return v === null || v === undefined ? '' : String(v).slice(0, 60); }).join('\t') + '\n';
+      });
+    } catch {}
+  }
+
+  // Aggregations if requested
+  if (_aiCtx === 'agg') {
+    ctx += `AGGREGATIONS\n`;
+    for (const c of strCols.slice(0, 4)) {
+      try {
+        const r = await _conn.query(
+          `SELECT "${c}" as grp, COUNT(*) as cnt FROM clean_data WHERE "${c}" IS NOT NULL GROUP BY "${c}" ORDER BY cnt DESC LIMIT 10`
+        );
+        const rows = r.toArray();
+        ctx += `  ${c} breakdown: ${rows.map(row => `${row.grp}=${Number(row.cnt)}`).join(', ')}\n`;
+      } catch {}
+    }
+  }
+
+  return ctx;
+}
+
+async function runAI() {
+  const question = document.getElementById('aiPrompt').value.trim();
+  if (!question) { showAiError('Please enter a question.'); return; }
+
+  // Load key from localStorage if not set
+  if (!_aiKey) {
+    _aiKey = localStorage.getItem('_gemini_key') || '';
+  }
+  if (!_aiKey) { showAiError('Please save your Gemini API key first.'); return; }
+
+  const btn = document.getElementById('aiRunBtn');
+  btn.textContent = '⏳ Thinking…'; btn.disabled = true;
+  document.getElementById('aiError').style.display = 'none';
+
+  const outputWrap = document.getElementById('aiOutputWrap');
+  const outputBody = document.getElementById('aiOutputBody');
+  const outputMeta = document.getElementById('aiOutputMeta');
+  outputWrap.style.display = '';
+  outputBody.innerHTML = '<span class="ai-cursor"></span>';
+  outputMeta.textContent = `${_aiModel} · streaming…`;
+
+  // Rebuild context if not cached
+  if (!_aiContextCache) _aiContextCache = await buildAiContext();
+
+  const systemPrompt = `You are a data analyst assistant. The user has provided a dataset summary below.
+Answer their question concisely and specifically using the data provided.
+Format your response clearly — use bullet points for lists, bold for key numbers.
+Never make up data. If the answer cannot be determined from the context, say so.
+
+${_aiContextCache}`;
+
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${_aiModel}:streamGenerateContent?alt=sse&key=${_aiKey}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        contents: [{ role: 'user', parts: [{ text: question }] }],
+        generationConfig: { temperature: 0.3, maxOutputTokens: 1024 }
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `HTTP ${res.status} — check your API key`);
+    }
+
+    // Stream SSE response
+    let fullText = '';
+    outputBody.innerHTML = '';
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const raw = line.slice(6).trim();
+        if (raw === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(raw);
+          const chunk = parsed?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          if (chunk) {
+            fullText += chunk;
+            outputBody.innerHTML = renderAiText(fullText) + '<span class="ai-cursor"></span>';
+            outputBody.scrollTop = outputBody.scrollHeight;
+          }
+        } catch {}
+      }
+    }
+
+    outputBody.innerHTML = renderAiText(fullText);
+    outputMeta.textContent = `${_aiModel} · ${fullText.length} chars`;
+
+    // Save to history
+    _aiHistory.unshift({ q: question, a: fullText, model: _aiModel });
+    renderAiHistory();
+    document.getElementById('aiPrompt').value = '';
+
+  } catch (err) {
+    outputBody.innerHTML = '';
+    showAiError(err.message);
+    outputWrap.style.display = 'none';
+  }
+
+  btn.textContent = '✦ Ask Gemini'; btn.disabled = false;
+}
+
+function renderAiText(text) {
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/^• /gm, '  • ')
+    .replace(/^- /gm, '  • ');
+}
+
+function renderAiHistory() {
+  const el = document.getElementById('aiHistory');
+  if (!_aiHistory.length) { el.innerHTML = ''; return; }
+  el.innerHTML = _aiHistory.map((h, i) => `
+    <div class="ai-hist-item">
+      <div class="ai-hist-q">
+        <span class="ai-hist-q-text">${h.q.replace(/</g,'&lt;')}</span>
+        <span style="font-size:9px;opacity:.6;flex-shrink:0">${h.model}</span>
+        <button class="ai-hist-del" onclick="removeAiHistory(${i})">×</button>
+      </div>
+      <div class="ai-hist-a">${renderAiText(h.a)}</div>
+    </div>`).join('');
+}
+
+function removeAiHistory(i) {
+  _aiHistory.splice(i, 1);
+  renderAiHistory();
+}
+
+function clearAiHistory() {
+  _aiHistory = [];
+  renderAiHistory();
+  document.getElementById('aiOutputWrap').style.display = 'none';
+}
+
+function showAiError(msg) {
+  const el = document.getElementById('aiError');
+  el.textContent = '✕ ' + msg;
+  el.style.display = 'flex';
+}
+
+function copyAiResponse() {
+  const text = document.getElementById('aiOutputBody').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    btn.textContent = 'Copied ✓';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 1800);
+  });
+}
+
+// Restore key from localStorage on load
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('_gemini_key');
+  if (saved) _aiKey = saved;
+});
 
 // ── Boot ──────────────────────────────────────────────
 initDuckDB();
