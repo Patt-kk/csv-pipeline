@@ -522,11 +522,26 @@
       <div class="tab-panel" id="tab-profile">
         <div id="colProfile"></div>
       </div>
-
       <div class="btn-row" style="margin-top:16px">
-        <button class="btn btn-primary" onclick="showStage4()">Continue to Stage 4 → Dashboard</button>
-        <button class="btn btn-outline" onclick="exportCSV()">Export clean_data as CSV</button>
-      </div>
+       <button class="btn btn-primary"
+         onclick="showStage4()">
+         Continue to Stage 4 → Dashboard
+       </button>
+
+       <button class="btn btn-outline"
+        onclick="exportCSV()">
+        Export clean_data as CSV
+       </button>
+
+       <!-- NEW: appears after export -->
+       <a id="openLabBtn"
+        href="minorfood_lab_v0_5.html"
+        target="_blank"
+        class="btn btn-purple"
+        style="display:none;text-decoration:none">
+        Open in MFG Lab ↗
+       </a>
+     </div>
     </div>
   </div>
 
@@ -1139,14 +1154,22 @@ async function exportCSV() {
         const v = r[c];
         if (v === null || v === undefined) return '';
         const s = String(v);
-        return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g,'""')}"` : s;
+        return s.includes(',') || s.includes('"') || s.includes('
+')
+          ? '"' + s.replace(/"/g,'""') + '"' : s;
       }).join(',')
-    )].join('\n');
+    )].join('
+');
+
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'clean_data.csv';
     a.click();
+
+    // Show "Open in Lab" button after export
+    document.getElementById('openLabBtn').style.display = 'inline-flex';
+
   } catch (err) { alert('Export error: ' + err.message); }
 }
 
