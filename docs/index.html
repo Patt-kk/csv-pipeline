@@ -302,12 +302,116 @@
       padding: 2px 9px; font-family: var(--mono); font-size: 11px; color: #3C3489;
     }
 
+    /* ── Stage 4: Dashboard ── */
+    .chart-builder {
+      display: grid; grid-template-columns: 260px 1fr;
+      gap: 16px; align-items: start;
+    }
+    .chart-controls {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 16px;
+    }
+    .ctrl-label {
+      font-family: var(--mono); font-size: 10px; color: var(--hint);
+      letter-spacing: 0.07em; text-transform: uppercase;
+      margin-bottom: 5px; margin-top: 12px;
+    }
+    .ctrl-label:first-child { margin-top: 0; }
+    select.ctrl-select {
+      width: 100%; padding: 7px 10px;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 6px;
+      font-family: var(--mono); font-size: 12px;
+      outline: none; cursor: pointer;
+    }
+    select.ctrl-select:focus { border-color: var(--teal); }
+    .chart-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .ct-btn {
+      padding: 8px 6px; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--muted);
+      font-family: var(--mono); font-size: 10px; cursor: pointer;
+      text-align: center; transition: all 0.15s;
+    }
+    .ct-btn:hover { border-color: var(--border2); color: var(--text); }
+    .ct-btn.active { background: var(--teal-light); border-color: var(--teal); color: var(--teal-dark); }
+    .ct-icon { font-size: 16px; display: block; margin-bottom: 3px; }
+    .chart-frame {
+      border: 1px solid var(--border); border-radius: 8px;
+      overflow: hidden; min-height: 360px;
+      background: var(--surface);
+    }
+    .chart-placeholder {
+      display: flex; align-items: center; justify-content: center;
+      height: 360px; color: var(--hint);
+      font-family: var(--mono); font-size: 12px;
+      flex-direction: column; gap: 8px;
+    }
+    .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .dash-chart-wrap { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface); }
+    .dash-chart-title {
+      font-family: var(--mono); font-size: 11px; color: var(--muted);
+      padding: 10px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .dash-chart-title button {
+      background: none; border: none; cursor: pointer;
+      color: var(--hint); font-size: 14px; padding: 0; line-height: 1;
+    }
+    .dash-chart-title button:hover { color: var(--red); }
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+
+    /* ── Stage 4: Dashboard ── */
+    .dash-kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 16px; }
+    .dash-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+    .dash-kpi-val { font-size: 26px; font-weight: 500; letter-spacing: -0.02em; }
+    .dash-kpi-val.c-teal { color: var(--teal); }
+    .dash-kpi-val.c-amber { color: var(--amber); }
+    .dash-kpi-val.c-red { color: var(--red); }
+    .dash-kpi-val.c-purple { color: var(--purple); }
+    .dash-kpi-label { font-family: var(--mono); font-size: 9px; color: var(--hint); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 5px; }
+
+    .chart-builder-wrap { display: grid; grid-template-columns: 220px 1fr; gap: 14px; align-items: start; }
+    .chart-controls-panel { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; position: sticky; top: 68px; }
+    .cfg-label { font-family: var(--mono); font-size: 9px; color: var(--hint); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; margin-top: 12px; }
+    .cfg-label:first-child { margin-top: 0; }
+    select.cfg-select {
+      width: 100%; padding: 7px 9px;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 6px;
+      font-family: var(--mono); font-size: 11px; outline: none; cursor: pointer;
+    }
+    select.cfg-select:focus { border-color: var(--teal); }
+    .chart-type-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 5px; }
+    .ct-pill {
+      padding: 7px 4px; border-radius: 5px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--muted);
+      font-family: var(--mono); font-size: 9px; cursor: pointer;
+      text-align: center; transition: all 0.15s; letter-spacing: 0.02em;
+    }
+    .ct-pill:hover { border-color: var(--border2); color: var(--text); }
+    .ct-pill.active { background: var(--teal-light); border-color: var(--teal); color: var(--teal-dark); }
+
+    .chart-preview-wrap { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); overflow: hidden; }
+    .chart-preview-empty { display: flex; align-items: center; justify-content: center; min-height: 320px; font-family: var(--mono); font-size: 12px; color: var(--hint); flex-direction: column; gap: 8px; }
+
+    .pinned-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .pinned-card { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); overflow: hidden; }
+    .pinned-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 13px; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 10px; color: var(--muted); }
+    .pinned-del { background: none; border: none; cursor: pointer; color: var(--hint); font-size: 13px; line-height: 1; padding: 0; }
+    .pinned-del:hover { color: var(--red); }
+
     /* ── Responsive ── */
-    @media (max-width: 600px) {
+    @media (max-width: 700px) {
       .stats-row { grid-template-columns: repeat(2, 1fr); }
       .pipeline-steps { display: none; }
       .transform-grid { grid-template-columns: 1fr; }
       .clean-stats { grid-template-columns: repeat(2, 1fr); }
+      .chart-builder { grid-template-columns: 1fr; }
+      .chart-builder-wrap { grid-template-columns: 1fr; }
+      .dash-grid { grid-template-columns: 1fr; }
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+      .dash-kpi-row { grid-template-columns: repeat(2, 1fr); }
+      .pinned-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -522,30 +626,120 @@
       <div class="tab-panel" id="tab-profile">
         <div id="colProfile"></div>
       </div>
+
       <div class="btn-row" style="margin-top:16px">
-       <button class="btn btn-primary"
-         onclick="showStage4()">
-         Continue to Stage 4 → Dashboard
-       </button>
-
-       <button class="btn btn-outline"
-        onclick="exportCSV()">
-        Export clean_data as CSV
-       </button>
-
-       <!-- NEW: appears after export -->
-       <a id="openLabBtn"
-        href="minorfood_lab_v0_5.html"
-        target="_blank"
-        class="btn btn-purple"
-        style="display:none;text-decoration:none">
-        Open in MFG Lab ↗
-       </a>
-     </div>
+        <button class="btn btn-primary" onclick="showStage4()">Continue to Stage 4 → Dashboard</button>
+        <button class="btn btn-outline" onclick="exportCSV()">Export clean_data as CSV</button>
+        <a id="openLabBtn" href="minorfood_lab_v0_5.html" target="_blank"
+           class="btn btn-purple" style="display:none;text-decoration:none">
+          Open in MFG Lab ↗
+        </a>
+      </div>
     </div>
   </div>
 
+  <!-- Stage 4 divider -->
+  <div class="stage-divider" id="divider4" style="display:none">STAGE 4 · VISUALIZE</div>
+
+  <!-- ════════════════════════════════
+       STAGE 4 — DASHBOARD
+  ════════════════════════════════ -->
+  <div id="stage4" class="hidden">
+    <div class="stage-badge"><span class="dot" style="background:#378ADD"></span>STAGE 4 · VISUALIZE</div>
+    <div class="stage-heading">Dashboard</div>
+    <div class="stage-sub">Query <span class="view-pill" style="background:#E6F1FB;border-color:#85B7EB;color:#0C447C">clean_data</span> and build interactive Plotly charts. Pin charts to build a full dashboard.</div>
+
+    <!-- KPI row — auto-populated -->
+    <div class="dash-kpi-row" id="dashKpiRow" style="display:none"></div>
+
+    <!-- Chart builder -->
+    <div class="card">
+      <div class="card-title">Chart builder</div>
+      <div class="chart-builder-wrap">
+
+        <!-- Left: controls -->
+        <div class="chart-controls-panel">
+          <div class="cfg-label">Chart type</div>
+          <div class="chart-type-grid" id="chartTypeGrid">
+            <div class="ct-pill active" data-type="bar" onclick="selectChartType('bar')">Bar</div>
+            <div class="ct-pill" data-type="line" onclick="selectChartType('line')">Line</div>
+            <div class="ct-pill" data-type="scatter" onclick="selectChartType('scatter')">Scatter</div>
+            <div class="ct-pill" data-type="pie" onclick="selectChartType('pie')">Pie</div>
+            <div class="ct-pill" data-type="histogram" onclick="selectChartType('histogram')">Histogram</div>
+            <div class="ct-pill" data-type="box" onclick="selectChartType('box')">Box</div>
+          </div>
+
+          <div class="cfg-label" id="xAxisLabel">X axis / Category</div>
+          <select class="cfg-select" id="xColSelect" onchange="previewChart()"></select>
+
+          <div class="cfg-label" id="yAxisLabel">Y axis / Value</div>
+          <select class="cfg-select" id="yColSelect" onchange="previewChart()"></select>
+
+          <div class="cfg-label">Aggregation</div>
+          <select class="cfg-select" id="aggSelect" onchange="previewChart()">
+            <option value="none">None (raw values)</option>
+            <option value="count" selected>Count</option>
+            <option value="sum">Sum</option>
+            <option value="avg">Average</option>
+            <option value="min">Min</option>
+            <option value="max">Max</option>
+          </select>
+
+          <div class="cfg-label">Limit rows</div>
+          <select class="cfg-select" id="limitSelect" onchange="previewChart()">
+            <option value="20">Top 20</option>
+            <option value="50" selected>Top 50</option>
+            <option value="100">Top 100</option>
+            <option value="0">All rows</option>
+          </select>
+
+          <div style="margin-top:14px;display:flex;flex-direction:column;gap:7px">
+            <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="previewChart()">▶ Preview</button>
+            <button class="btn btn-purple" style="width:100%;justify-content:center" onclick="pinChart()">+ Pin to dashboard</button>
+          </div>
+        </div>
+
+        <!-- Right: preview -->
+        <div>
+          <div class="chart-preview-wrap" id="chartPreviewWrap">
+            <div class="chart-preview-empty" id="chartPreviewEmpty">
+              <span style="font-size:24px;opacity:.3">◫</span>
+              Configure and click Preview
+            </div>
+            <div id="chartPreviewPlot" style="display:none;padding:8px"></div>
+          </div>
+          <div id="chartPreviewMeta" style="font-family:var(--mono);font-size:10px;color:var(--hint);margin-top:6px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pinned dashboard -->
+    <div class="card" id="pinnedCard" style="display:none">
+      <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Pinned dashboard <span id="pinnedCount" style="color:var(--muted)">0 charts</span></span>
+        <button class="btn btn-outline" style="padding:5px 12px;font-size:12px" onclick="clearPinned()">Clear all</button>
+      </div>
+      <div class="pinned-grid" id="pinnedGrid"></div>
+    </div>
+
+    <!-- Proceed -->
+    <div class="card" id="stage4ProceedCard" style="display:none">
+      <div class="card-title">Ready for Stage 5</div>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:16px">
+        Dashboard built. Stage 5 adds Gemini AI analysis directly on your <code style="font-family:var(--mono);font-size:12px">clean_data</code> — ask questions in plain English and get data-grounded answers.
+      </p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="showStage5()">Continue to Stage 5 → AI Analysis</button>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /stage4 end placeholder -->
+
 </div><!-- /main -->
+
+<!-- Plotly CDN -->
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2/plotly.min.js"></script>
 
 <!-- DuckDB-WASM via ESM -->
 <script type="module">
@@ -1154,27 +1348,263 @@ async function exportCSV() {
         const v = r[c];
         if (v === null || v === undefined) return '';
         const s = String(v);
-        return s.includes(',') || s.includes('"') || s.includes('
-')
-          ? '"' + s.replace(/"/g,'""') + '"' : s;
+        return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g,'""')}"` : s;
       }).join(',')
-    )].join('
-');
-
+    )].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'clean_data.csv';
     a.click();
-
-    // Show "Open in Lab" button after export
     document.getElementById('openLabBtn').style.display = 'inline-flex';
-
   } catch (err) { alert('Export error: ' + err.message); }
 }
 
-function showStage4() {
-  alert('Stage 4 coming next — Pyodide + Plotly dashboard!');
+// ── STAGE 4: Dashboard ────────────────────────────────
+let _chartType = 'bar';
+let _pinnedCharts = [];   // array of { title, data, layout }
+
+async function showStage4() {
+  document.getElementById('divider4').style.display = '';
+  document.getElementById('stage4').classList.remove('hidden');
+  document.getElementById('nav3').className = 'pipe-step done';
+  document.getElementById('nav4').className = 'pipe-step active';
+  await buildDashboardUI();
+  document.getElementById('stage4').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function buildDashboardUI() {
+  if (!_conn || !_cleanCols.length) return;
+
+  // Populate column selectors
+  const numCols = _cleanCols.filter(c => _colTypes[c] === 'number');
+  const allCols = _cleanCols;
+
+  const xSel = document.getElementById('xColSelect');
+  const ySel = document.getElementById('yColSelect');
+  xSel.innerHTML = allCols.map(c => `<option value="${c}">${c}</option>`).join('');
+  ySel.innerHTML = [
+    '<option value="*">— count rows —</option>',
+    ...numCols.map(c => `<option value="${c}">${c}</option>`)
+  ].join('');
+
+  // Auto-select sensible defaults
+  const strCol = _cleanCols.find(c => _colTypes[c] === 'string');
+  if (strCol) xSel.value = strCol;
+
+  // Build KPI row from numeric columns
+  await buildKPIs();
+}
+
+async function buildKPIs() {
+  const numCols = _cleanCols.filter(c => _colTypes[c] === 'number').slice(0, 4);
+  if (!numCols.length) return;
+
+  const colors = ['c-teal', 'c-amber', 'c-purple', 'c-red'];
+  const parts = await Promise.all(numCols.map(async (c, i) => {
+    try {
+      const r = await _conn.query(`SELECT ROUND(AVG(TRY_CAST("${c}" AS DOUBLE)),2) as avg_val, COUNT("${c}") as cnt FROM clean_data WHERE "${c}" IS NOT NULL`);
+      const row = r.toArray()[0];
+      const val = Number(row.avg_val);
+      const display = isNaN(val) ? '—' : val >= 1000 ? (val/1000).toFixed(1)+'k' : val.toFixed(1);
+      return `<div class="dash-kpi">
+        <div class="dash-kpi-val ${colors[i]}">${display}</div>
+        <div class="dash-kpi-label">avg ${c}</div>
+      </div>`;
+    } catch { return ''; }
+  }));
+
+  // Always show row count as first KPI
+  const countRes = await _conn.query('SELECT COUNT(*) as n FROM clean_data');
+  const count = Number(countRes.toArray()[0].n);
+  const kpiRow = document.getElementById('dashKpiRow');
+  kpiRow.innerHTML = `
+    <div class="dash-kpi">
+      <div class="dash-kpi-val c-teal">${count.toLocaleString()}</div>
+      <div class="dash-kpi-label">total rows</div>
+    </div>
+    ${parts.slice(0,3).join('')}`;
+  kpiRow.style.display = 'grid';
+}
+
+function selectChartType(type) {
+  _chartType = type;
+  document.querySelectorAll('.ct-pill').forEach(p => p.classList.toggle('active', p.dataset.type === type));
+
+  // Adjust Y label for chart types that don't use Y
+  const yLbl = document.getElementById('yAxisLabel');
+  const ySel = document.getElementById('yColSelect');
+  const aggSel = document.getElementById('aggSelect');
+  if (type === 'pie') {
+    yLbl.textContent = 'Values (optional)';
+    aggSel.value = 'count';
+  } else if (type === 'histogram') {
+    yLbl.textContent = 'Column to distribute';
+    aggSel.value = 'none';
+  } else {
+    yLbl.textContent = 'Y axis / Value';
+  }
+  previewChart();
+}
+
+async function previewChart() {
+  if (!_conn || !_cleanCols.length) return;
+  const xCol = document.getElementById('xColSelect').value;
+  const yCol = document.getElementById('yColSelect').value;
+  const agg  = document.getElementById('aggSelect').value;
+  const lim  = parseInt(document.getElementById('limitSelect').value) || 0;
+  if (!xCol) return;
+
+  try {
+    let sql, data, layout;
+    const safeX = `"${xCol}"`;
+    const safeY = yCol && yCol !== '*' ? `"${yCol}"` : null;
+    const limitClause = lim > 0 ? `LIMIT ${lim}` : '';
+
+    // Build SQL based on chart type + aggregation
+    if (_chartType === 'histogram') {
+      const res = await _conn.query(`SELECT ${safeX} as val FROM clean_data WHERE ${safeX} IS NOT NULL ${limitClause}`);
+      const vals = res.toArray().map(r => r.val).filter(v => v !== null);
+      data = [{ x: vals, type: 'histogram', marker: { color: '#1D9E75', opacity: 0.85 } }];
+      layout = { xaxis: { title: xCol }, yaxis: { title: 'Count' } };
+
+    } else if (_chartType === 'pie') {
+      const res = await _conn.query(`SELECT ${safeX} as label, COUNT(*) as val FROM clean_data WHERE ${safeX} IS NOT NULL GROUP BY ${safeX} ORDER BY val DESC ${limitClause}`);
+      const rows = res.toArray();
+      data = [{ labels: rows.map(r => String(r.label)), values: rows.map(r => Number(r.val)), type: 'pie', hole: 0.35,
+        marker: { colors: ['#1D9E75','#534AB7','#EF9F27','#378ADD','#D85A30','#639922','#D4537E','#5DCAA5'] } }];
+      layout = {};
+
+    } else if (_chartType === 'scatter') {
+      const yExpr = safeY || 'rowid';
+      const res = await _conn.query(`SELECT ${safeX} as x, ${yExpr} as y FROM clean_data WHERE ${safeX} IS NOT NULL ${limitClause}`);
+      const rows = res.toArray();
+      data = [{ x: rows.map(r => r.x), y: rows.map(r => Number(r.y)),
+        mode: 'markers', type: 'scatter',
+        marker: { color: '#534AB7', size: 6, opacity: 0.7 } }];
+      layout = { xaxis: { title: xCol }, yaxis: { title: yCol || 'index' } };
+
+    } else if (_chartType === 'box') {
+      const yExpr = safeY || safeX;
+      const res = await _conn.query(`SELECT ${safeX} as grp, ${yExpr} as val FROM clean_data WHERE ${safeX} IS NOT NULL AND ${yExpr} IS NOT NULL ${limitClause}`);
+      const rows = res.toArray();
+      const groups = [...new Set(rows.map(r => String(r.grp)))].slice(0, 20);
+      data = groups.map(g => ({
+        y: rows.filter(r => String(r.grp) === g).map(r => Number(r.val)),
+        name: g, type: 'box', boxpoints: false
+      }));
+      layout = { xaxis: { title: xCol }, yaxis: { title: yCol || xCol } };
+
+    } else {
+      // Bar or Line — with aggregation
+      let aggExpr;
+      if (agg === 'count' || !safeY) aggExpr = `COUNT(*) as y_val`;
+      else if (agg === 'sum')   aggExpr = `SUM(TRY_CAST(${safeY} AS DOUBLE)) as y_val`;
+      else if (agg === 'avg')   aggExpr = `AVG(TRY_CAST(${safeY} AS DOUBLE)) as y_val`;
+      else if (agg === 'min')   aggExpr = `MIN(TRY_CAST(${safeY} AS DOUBLE)) as y_val`;
+      else if (agg === 'max')   aggExpr = `MAX(TRY_CAST(${safeY} AS DOUBLE)) as y_val`;
+      else                      aggExpr = safeY ? `${safeY} as y_val` : `COUNT(*) as y_val`;
+
+      const groupBy = (agg !== 'none' || !safeY) ? `GROUP BY ${safeX}` : '';
+      const orderBy = `ORDER BY y_val DESC`;
+      const res = await _conn.query(
+        `SELECT ${safeX} as x_val, ${aggExpr} FROM clean_data WHERE ${safeX} IS NOT NULL ${groupBy} ${orderBy} ${limitClause}`
+      );
+      const rows = res.toArray();
+      const xs = rows.map(r => String(r.x_val));
+      const ys = rows.map(r => Number(r.y_val));
+
+      if (_chartType === 'line') {
+        data = [{ x: xs, y: ys, type: 'scatter', mode: 'lines+markers',
+          line: { color: '#1D9E75', width: 2 }, marker: { color: '#1D9E75', size: 5 } }];
+      } else {
+        data = [{ x: xs, y: ys, type: 'bar',
+          marker: { color: '#1D9E75', opacity: 0.85 } }];
+      }
+      const yLabel = agg === 'count' ? 'Count' : `${agg} of ${yCol}`;
+      layout = { xaxis: { title: xCol, tickangle: xs.length > 10 ? -35 : 0 }, yaxis: { title: yLabel } };
+    }
+
+    // Common layout settings
+    const plotLayout = Object.assign({
+      margin: { t: 18, r: 18, b: xs ? (xs.length > 10 ? 90 : 50) : 50, l: 55 },
+      paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
+      font: { family: 'IBM Plex Mono, monospace', size: 11, color: '#6b6960' },
+      showlegend: _chartType === 'pie',
+      height: 320,
+    }, layout);
+
+    const config = { responsive: true, displayModeBar: false };
+
+    document.getElementById('chartPreviewEmpty').style.display = 'none';
+    const plotDiv = document.getElementById('chartPreviewPlot');
+    plotDiv.style.display = '';
+    Plotly.react(plotDiv, data, plotLayout, config);
+
+    // Meta line
+    const rowCount = data[0]?.x?.length || data[0]?.labels?.length || '?';
+    document.getElementById('chartPreviewMeta').textContent =
+      `${_chartType} · ${xCol}${yCol && yCol !== '*' ? ' × ' + yCol : ''} · ${rowCount} data points`;
+
+    // Store for pinning
+    window._lastChartData   = data;
+    window._lastChartLayout = plotLayout;
+    window._lastChartTitle  = `${_chartType}: ${xCol}${yCol && yCol !== '*' ? ' × ' + yCol : ''}`;
+
+    // Show proceed card after first preview
+    document.getElementById('stage4ProceedCard').style.display = '';
+
+  } catch (err) {
+    document.getElementById('chartPreviewMeta').textContent = '✕ ' + err.message;
+    console.error('Chart error:', err);
+  }
+}
+
+function pinChart() {
+  if (!window._lastChartData) { alert('Preview a chart first.'); return; }
+  const id = 'pinned_' + Date.now();
+  _pinnedCharts.push({ id, title: window._lastChartTitle, data: window._lastChartData, layout: window._lastChartLayout });
+  renderPinnedDashboard();
+  document.getElementById('pinnedCard').style.display = '';
+}
+
+function renderPinnedDashboard() {
+  const grid = document.getElementById('pinnedGrid');
+  document.getElementById('pinnedCount').textContent = _pinnedCharts.length + ' chart' + (_pinnedCharts.length !== 1 ? 's' : '');
+  grid.innerHTML = _pinnedCharts.map(c => `
+    <div class="pinned-card" id="pc_${c.id}">
+      <div class="pinned-header">
+        <span>${c.title}</span>
+        <button class="pinned-del" onclick="unpinChart('${c.id}')">×</button>
+      </div>
+      <div id="plot_${c.id}" style="padding:6px"></div>
+    </div>`).join('');
+
+  // Render each pinned chart
+  _pinnedCharts.forEach(c => {
+    const smallLayout = Object.assign({}, c.layout, {
+      height: 220, margin: { t: 10, r: 10, b: 50, l: 45 },
+      font: { family: 'IBM Plex Mono, monospace', size: 10, color: '#6b6960' }
+    });
+    setTimeout(() => {
+      Plotly.newPlot('plot_' + c.id, c.data, smallLayout, { responsive: true, displayModeBar: false });
+    }, 50);
+  });
+}
+
+function unpinChart(id) {
+  _pinnedCharts = _pinnedCharts.filter(c => c.id !== id);
+  renderPinnedDashboard();
+  if (!_pinnedCharts.length) document.getElementById('pinnedCard').style.display = 'none';
+}
+
+function clearPinned() {
+  _pinnedCharts = [];
+  document.getElementById('pinnedCard').style.display = 'none';
+}
+
+function showStage5() {
+  alert('Stage 5 coming next — Gemini AI analysis on your clean_data!');
 }
 
 // ── Boot ──────────────────────────────────────────────
