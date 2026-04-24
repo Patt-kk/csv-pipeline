@@ -2,10 +2,725 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CSV Pipeline</title>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5/papaparse.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8f7f4;
+      --surface: #ffffff;
+      --border: #e2e0d8;
+      --border2: #cccab8;
+      --text: #1a1a18;
+      --muted: #6b6960;
+      --hint: #a09e96;
+      --teal: #1D9E75;
+      --teal-light: #E1F5EE;
+      --teal-dark: #085041;
+      --purple: #534AB7;
+      --amber: #BA7517;
+      --amber-light: #FAEEDA;
+      --red: #A32D2D;
+      --red-light: #FCEBEB;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* ── Top nav ── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .logo { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--text); }
+    .logo span { color: var(--teal); }
+    .pipeline-steps { display: flex; align-items: center; gap: 0; }
+    .pipe-step {
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 12px;
+      font-family: var(--mono); font-size: 10px;
+      color: var(--hint);
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+    .pipe-step.active { color: var(--teal); }
+    .pipe-step.done { color: var(--muted); }
+    .pipe-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--border2); flex-shrink: 0;
+    }
+    .pipe-step.active .pipe-dot { background: var(--teal); }
+    .pipe-step.done .pipe-dot { background: var(--muted); }
+    .pipe-arrow { color: var(--border2); font-size: 10px; padding: 0 2px; }
+
+    /* ── Layout ── */
+    .main { max-width: 900px; margin: 0 auto; padding: 36px 24px 80px; }
+
+    /* ── Stage heading ── */
+    .stage-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 4px; padding: 3px 10px;
+      font-family: var(--mono); font-size: 10px;
+      color: var(--muted); letter-spacing: 0.06em;
+      margin-bottom: 12px;
+    }
+    .stage-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); }
+    .stage-heading { font-size: 24px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 6px; }
+    .stage-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px; margin-bottom: 16px;
+    }
+    .card-title {
+      font-family: var(--mono); font-size: 11px; font-weight: 500;
+      color: var(--muted); letter-spacing: 0.07em; text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    /* ── Drop zone ── */
+    .drop-zone {
+      border: 1.5px dashed var(--border2); border-radius: 10px;
+      padding: 40px 24px; text-align: center; cursor: pointer;
+      background: var(--bg); transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.over { border-color: var(--teal); background: var(--teal-light); }
+    .drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .drop-icon {
+      width: 44px; height: 44px; margin: 0 auto 14px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .drop-label { font-size: 15px; font-weight: 500; margin-bottom: 5px; }
+    .drop-hint { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+    /* ── Stats row ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+    .stat-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+    .stat-label { font-family: var(--mono); font-size: 9px; color: var(--hint); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px; }
+    .stat-value { font-size: 22px; font-weight: 500; letter-spacing: -0.02em; }
+    .stat-value.ok { color: var(--teal); }
+    .stat-value.warn { color: var(--amber); }
+
+    /* ── Alerts ── */
+    .alert { display: flex; gap: 8px; padding: 9px 12px; border-radius: 6px; font-size: 12px; font-family: var(--mono); margin-bottom: 8px; line-height: 1.5; }
+    .alert.ok { background: var(--teal-light); color: var(--teal-dark); border: 1px solid #9FE1CB; }
+    .alert.warn { background: var(--amber-light); color: #412402; border: 1px solid #FAC775; }
+    .alert.error { background: var(--red-light); color: #501313; border: 1px solid #F7C1C1; }
+
+    /* ── Column chips ── */
+    .col-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 4px;
+      font-family: var(--mono); font-size: 11px;
+      background: var(--bg); border: 1px solid var(--border); color: var(--muted);
+    }
+    .chip-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .t-num { background: #5DCAA5; }
+    .t-str { background: #7F77DD; }
+    .t-date { background: #EF9F27; }
+    .t-bool { background: #D85A30; }
+    .t-null { background: #a09e96; }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 18px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: var(--mono); }
+    thead tr { background: var(--bg); border-bottom: 1px solid var(--border); }
+    th { padding: 9px 13px; text-align: left; font-weight: 500; white-space: nowrap; color: var(--text); }
+    th .th-type { font-weight: 400; font-size: 10px; color: var(--hint); margin-left: 4px; }
+    td { padding: 8px 13px; border-bottom: 1px solid var(--border); color: var(--muted); white-space: nowrap; max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
+    td.null { color: var(--hint); font-style: italic; }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--bg); color: var(--text); }
+
+    /* ── Progress bar ── */
+    .prog-wrap { margin: 10px 0 14px; }
+    .prog-label { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+    .prog-track { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .prog-fill { height: 100%; background: var(--teal); border-radius: 2px; width: 0%; transition: width 0.4s ease; }
+
+    /* ── DuckDB status ── */
+    .db-status {
+      display: flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 12px; color: var(--muted);
+    }
+    .db-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--border2); transition: background 0.3s;
+    }
+    .db-dot.loading { background: var(--amber); animation: pulse 1s infinite; }
+    .db-dot.ready { background: var(--teal); }
+    .db-dot.error { background: var(--red); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* ── SQL console ── */
+    .sql-wrap { position: relative; }
+    textarea.sql-input {
+      width: 100%; min-height: 80px;
+      background: #1a1a18; color: #e8e6df;
+      border: 1px solid #333; border-radius: 8px;
+      font-family: var(--mono); font-size: 12px; line-height: 1.7;
+      padding: 12px 14px; resize: vertical;
+      outline: none; transition: border-color 0.2s;
+    }
+    textarea.sql-input:focus { border-color: var(--teal); }
+    .sql-hint { font-family: var(--mono); font-size: 10px; color: var(--hint); margin-top: 5px; }
+
+    /* ── Buttons ── */
+    .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      font-family: var(--sans); cursor: pointer; border: none; transition: all 0.15s;
+    }
+    .btn-primary { background: var(--teal); color: var(--teal-dark); }
+    .btn-primary:hover { background: #0F6E56; color: var(--teal-light); }
+    .btn-primary:disabled { background: var(--border); color: var(--hint); cursor: not-allowed; }
+    .btn-outline { background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
+    .btn-outline:hover { border-color: var(--border2); color: var(--text); }
+    .btn-purple { background: #EEEDFE; color: #3C3489; border: 1px solid #AFA9EC; }
+    .btn-purple:hover { background: #534AB7; color: #EEEDFE; }
+    .btn-purple:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Schema table ── */
+    .schema-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+    .schema-col { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
+    .schema-name { font-family: var(--mono); font-size: 12px; font-weight: 500; margin-bottom: 3px; }
+    .schema-type { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+
+    /* ── Load progress ── */
+    .load-status { font-family: var(--mono); font-size: 12px; color: var(--muted); padding: 10px 0; min-height: 24px; }
+    .load-status.ok { color: var(--teal); }
+    .load-status.error { color: var(--red); }
+
+    /* ── Query results ── */
+    .result-meta { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+
+    /* ── Divider ── */
+    .stage-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 32px 0; color: var(--hint); font-family: var(--mono); font-size: 11px;
+    }
+    .stage-divider::before, .stage-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    .hidden { display: none !important; }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .pipeline-steps { display: none; }
+    }
+  </style>
 </head>
-<body style="font-family:sans-serif;padding:2rem">
-  <h1>CSV Pipeline</h1>
-  <p>Stage 1 coming soon.</p>
+<body>
+
+<!-- Top navigation bar -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">csv<span>.</span>pipeline</div>
+    <div class="pipeline-steps">
+      <div class="pipe-arrow">·</div>
+      <div class="pipe-step done" id="nav1"><span class="pipe-dot"></span>EXTRACT</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step active" id="nav2"><span class="pipe-dot"></span>LOAD</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step" id="nav3"><span class="pipe-dot"></span>TRANSFORM</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step" id="nav4"><span class="pipe-dot"></span>VISUALIZE</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step" id="nav5"><span class="pipe-dot"></span>ANALYZE</div>
+    </div>
+  </div>
+  <div class="db-status">
+    <div class="db-dot loading" id="dbDot"></div>
+    <span id="dbLabel">Loading DuckDB…</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ════════════════════════════════
+       STAGE 1 — CSV UPLOAD
+  ════════════════════════════════ -->
+  <div id="stage1">
+    <div class="stage-badge"><span class="dot"></span>STAGE 1 · EXTRACT</div>
+    <div class="stage-heading">Load your CSV</div>
+    <div class="stage-sub">Upload a file — we'll parse it, detect types, and validate before loading into DuckDB.</div>
+
+    <div class="card">
+      <!-- Drop zone -->
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept=".csv,.tsv,.txt">
+        <div class="drop-icon">📄</div>
+        <div class="drop-label">Drop CSV here or click to browse</div>
+        <div class="drop-hint">.csv · .tsv · up to 50 MB · 300k+ rows supported</div>
+      </div>
+
+      <!-- Parse progress -->
+      <div id="parseProgress" class="hidden">
+        <div class="prog-wrap" style="margin-top:16px">
+          <div class="prog-label" id="parseLabel">Parsing…</div>
+          <div class="prog-track"><div class="prog-fill" id="parseFill"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results (hidden until file parsed) -->
+    <div id="parseResults" class="hidden">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">ROWS</div><div class="stat-value ok" id="sRows">—</div></div>
+        <div class="stat-card"><div class="stat-label">COLUMNS</div><div class="stat-value" id="sCols">—</div></div>
+        <div class="stat-card"><div class="stat-label">NULLS</div><div class="stat-value" id="sNulls">—</div></div>
+        <div class="stat-card"><div class="stat-label">FILE SIZE</div><div class="stat-value" id="sSize">—</div></div>
+      </div>
+
+      <!-- Alerts -->
+      <div id="alertList"></div>
+
+      <!-- Column schema -->
+      <div class="card">
+        <div class="card-title">Detected column types</div>
+        <div class="col-chips" id="colChips"></div>
+      </div>
+
+      <!-- Preview table -->
+      <div class="card">
+        <div class="card-title">Data preview · first 10 rows</div>
+        <div class="table-wrap"><table id="previewTable"></table></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="loadBtn" disabled>Load into DuckDB →</button>
+          <button class="btn btn-outline" onclick="resetUpload()">↺ Upload different file</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage divider -->
+  <div class="stage-divider" id="divider2" style="display:none">STAGE 2 · LOAD</div>
+
+  <!-- ════════════════════════════════
+       STAGE 2 — DUCKDB LOADING
+  ════════════════════════════════ -->
+  <div id="stage2" class="hidden">
+    <div class="stage-badge" style="--dot-color:#534AB7"><span class="dot" style="background:#534AB7"></span>STAGE 2 · LOAD</div>
+    <div class="stage-heading">DuckDB loaded</div>
+    <div class="stage-sub">Your data is now an in-browser SQL database. Run any SQL query against it.</div>
+
+    <!-- Load progress -->
+    <div class="card" id="loadProgressCard">
+      <div class="card-title">Inserting rows into DuckDB</div>
+      <div class="prog-wrap">
+        <div class="prog-label" id="loadLabel">Starting…</div>
+        <div class="prog-track"><div class="prog-fill" id="loadFill"></div></div>
+      </div>
+      <div class="load-status" id="loadStatus"></div>
+    </div>
+
+    <!-- Schema inspector (shown after load) -->
+    <div class="card hidden" id="schemaCard">
+      <div class="card-title">Table schema · <span id="schemaTableName" style="color:var(--teal)">raw_data</span></div>
+      <div class="schema-grid" id="schemaGrid"></div>
+    </div>
+
+    <!-- SQL console -->
+    <div class="card hidden" id="sqlCard">
+      <div class="card-title">SQL console</div>
+      <div class="sql-wrap">
+        <textarea class="sql-input" id="sqlInput" spellcheck="false">SELECT * FROM raw_data LIMIT 10;</textarea>
+      </div>
+      <div class="sql-hint">Tip: your table is named <code style="background:#1a1a18;color:#9FE1CB;padding:1px 5px;border-radius:3px">raw_data</code> · Press Ctrl+Enter to run</div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn btn-purple" id="runSqlBtn">▶ Run SQL</button>
+        <button class="btn btn-outline" onclick="setQuery('SELECT COUNT(*) as total_rows FROM raw_data;')">Count rows</button>
+        <button class="btn btn-outline" onclick="setQuery('DESCRIBE raw_data;')">Describe table</button>
+        <button class="btn btn-outline" onclick="setQuery('SELECT * FROM raw_data LIMIT 5;')">Sample 5 rows</button>
+      </div>
+      <div id="queryResults" style="margin-top:16px"></div>
+    </div>
+
+    <!-- Proceed to Stage 3 -->
+    <div class="card hidden" id="proceedCard">
+      <div class="card-title">Ready for Stage 3</div>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:16px">
+        Your data is live in DuckDB. In Stage 3 we'll write SQL transforms to clean, reshape,
+        and create a <code style="font-family:var(--mono);font-size:12px">clean_data</code> view ready for dashboarding.
+      </p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="proceedToStage3()">Continue to Stage 3 → Transform</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- DuckDB-WASM via ESM -->
+<script type="module">
+  import * as duckdb from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@latest/+esm';
+  window._duckdb = duckdb;
+  window._duckdbReady = true;
+  window.dispatchEvent(new Event('duckdb-loaded'));
+</script>
+
+<script>
+// ── Global state ──────────────────────────────────────
+let _db = null;
+let _conn = null;
+let _parsedData = null;
+let _colTypes = {};
+
+// ── DuckDB init ───────────────────────────────────────
+async function initDuckDB() {
+  const dot = document.getElementById('dbDot');
+  const lbl = document.getElementById('dbLabel');
+  try {
+    dot.className = 'db-dot loading';
+    lbl.textContent = 'Loading DuckDB-WASM…';
+
+    // Wait for ESM module to load
+    await new Promise(resolve => {
+      if (window._duckdbReady) return resolve();
+      window.addEventListener('duckdb-loaded', resolve, { once: true });
+    });
+
+    const duckdb = window._duckdb;
+    const BUNDLES = duckdb.getJsDelivrBundles();
+    const bundle = await duckdb.selectBundle(BUNDLES);
+
+    const worker_url = URL.createObjectURL(
+      new Blob([`importScripts("${bundle.mainWorker}");`], { type: 'text/javascript' })
+    );
+    const worker = new Worker(worker_url);
+    const logger = new duckdb.ConsoleLogger();
+    _db = new duckdb.AsyncDuckDB(logger, worker);
+    await _db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+    URL.revokeObjectURL(worker_url);
+    _conn = await _db.connect();
+
+    dot.className = 'db-dot ready';
+    lbl.textContent = 'DuckDB ready';
+
+    // Enable load button if data already parsed
+    if (_parsedData) document.getElementById('loadBtn').disabled = false;
+  } catch (e) {
+    dot.className = 'db-dot error';
+    lbl.textContent = 'DuckDB failed — check console';
+    console.error('DuckDB init error:', e);
+  }
+}
+
+// ── STAGE 1: CSV Upload ───────────────────────────────
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('over');
+  if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) processFile(e.target.files[0]);
+});
+
+function fmtBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(1) + ' MB';
+}
+
+function detectType(vals) {
+  const s = vals.filter(v => v !== null && v !== '').slice(0, 60);
+  if (!s.length) return 'null';
+  if (s.filter(v => !isNaN(v) && v.trim() !== '').length / s.length > 0.85) return 'number';
+  if (s.filter(v => /^\d{4}[-\/]\d{1,2}[-\/]\d{1,2}/.test(v.trim())).length / s.length > 0.7) return 'date';
+  if (s.filter(v => ['true','false','yes','no','1','0'].includes(v.toLowerCase().trim())).length / s.length > 0.85) return 'boolean';
+  return 'string';
+}
+
+function processFile(file) {
+  dropZone.classList.add('hidden');
+  document.getElementById('parseProgress').classList.remove('hidden');
+  document.getElementById('parseResults').classList.add('hidden');
+  animateParseFill(0, 40, 300);
+  document.getElementById('parseLabel').textContent = 'Reading file…';
+
+  Papa.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    dynamicTyping: false,
+    complete(results) {
+      animateParseFill(40, 100, 400);
+      document.getElementById('parseLabel').textContent = 'Detecting column types…';
+      setTimeout(() => renderParseResults(results, file), 450);
+    },
+    error(err) {
+      document.getElementById('parseLabel').textContent = '✕ ' + err.message;
+    }
+  });
+}
+
+function animateParseFill(from, to, dur) {
+  const fill = document.getElementById('parseFill');
+  const start = performance.now();
+  function step(now) {
+    const p = Math.min((now - start) / dur, 1);
+    fill.style.width = (from + (to - from) * p) + '%';
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function renderParseResults(results, file) {
+  document.getElementById('parseProgress').classList.add('hidden');
+  document.getElementById('parseResults').classList.remove('hidden');
+
+  const rows = results.data;
+  const cols = results.meta.fields || [];
+  let nulls = 0;
+  rows.forEach(r => cols.forEach(c => { if (r[c] === '' || r[c] == null) nulls++; }));
+  const total = rows.length * cols.length;
+  const nullPct = total > 0 ? ((nulls/total)*100).toFixed(1) : '0';
+
+  document.getElementById('sRows').textContent = rows.length.toLocaleString();
+  document.getElementById('sCols').textContent = cols.length;
+  const ne = document.getElementById('sNulls');
+  ne.textContent = nulls > total * 0.1 ? nullPct + '%' : nullPct + '%';
+  ne.className = 'stat-value ' + (nulls > total * 0.1 ? 'warn' : 'ok');
+  document.getElementById('sSize').textContent = fmtBytes(file.size);
+
+  // Validation alerts
+  const alerts = [];
+  if (results.errors.length) results.errors.slice(0,2).forEach(e => alerts.push({t:'error', m:`Parse error row ${e.row}: ${e.message}`}));
+  if (!cols.length) alerts.push({t:'error', m:'No columns found — check delimiter'});
+  if (nulls > total * 0.3) alerts.push({t:'warn', m:`${nullPct}% null values — consider cleaning in Stage 3`});
+  const dupes = cols.filter((c,i) => cols.indexOf(c) !== i);
+  if (dupes.length) alerts.push({t:'warn', m:`Duplicate column names: ${dupes.join(', ')}`});
+  const spaced = cols.filter(c => /\s/.test(c));
+  if (spaced.length) alerts.push({t:'warn', m:`${spaced.length} column(s) have spaces — DuckDB will quote them`});
+  if (!alerts.length) alerts.push({t:'ok', m:'File looks clean — ready to load into DuckDB'});
+
+  document.getElementById('alertList').innerHTML = alerts.map(a =>
+    `<div class="alert ${a.t}">${a.t==='ok'?'✓':a.t==='warn'?'⚠':'✕'} ${a.m}</div>`
+  ).join('');
+
+  // Column types
+  cols.forEach(c => { _colTypes[c] = detectType(rows.map(r => r[c])); });
+  const typeClass = {number:'t-num',string:'t-str',date:'t-date',boolean:'t-bool',null:'t-null'};
+  document.getElementById('colChips').innerHTML = cols.map(c =>
+    `<div class="chip"><span class="chip-dot ${typeClass[_colTypes[c]]||'t-null'}"></span>${c}<span style="opacity:.5;margin-left:3px">${_colTypes[c]}</span></div>`
+  ).join('');
+
+  // Preview table
+  const preview = rows.slice(0, 10);
+  document.getElementById('previewTable').innerHTML = `
+    <thead><tr>${cols.map(c => `<th>${c}<span class="th-type">${_colTypes[c]}</span></th>`).join('')}</tr></thead>
+    <tbody>${preview.map(row =>
+      `<tr>${cols.map(c => {
+        const v = row[c]; const empty = v === null || v === '';
+        return `<td class="${empty?'null':''}">${empty?'null':String(v)}</td>`;
+      }).join('')}</tr>`).join('')}</tbody>`;
+
+  // Store parsed data
+  _parsedData = { rows, cols, fileName: file.name };
+
+  // Enable load button if DuckDB is ready
+  const loadBtn = document.getElementById('loadBtn');
+  loadBtn.disabled = !(_db && _conn);
+  loadBtn.onclick = loadIntoDuckDB;
+}
+
+function resetUpload() {
+  _parsedData = null; _colTypes = {};
+  document.getElementById('parseResults').classList.add('hidden');
+  document.getElementById('dropZone').classList.remove('hidden');
+  document.getElementById('stage2').classList.add('hidden');
+  document.getElementById('divider2').style.display = 'none';
+  fileInput.value = '';
+}
+
+// ── STAGE 2: Load into DuckDB ─────────────────────────
+async function loadIntoDuckDB() {
+  if (!_parsedData || !_db || !_conn) return;
+
+  const { rows, cols, fileName } = _parsedData;
+
+  // Show stage 2
+  document.getElementById('divider2').style.display = '';
+  document.getElementById('stage2').classList.remove('hidden');
+  document.getElementById('loadBtn').disabled = true;
+
+  // Update nav
+  document.getElementById('nav1').className = 'pipe-step done';
+  document.getElementById('nav2').className = 'pipe-step active';
+
+  const label = document.getElementById('loadLabel');
+  const fill = document.getElementById('loadFill');
+  const status = document.getElementById('loadStatus');
+
+  try {
+    // Step 1 — build CREATE TABLE SQL
+    label.textContent = 'Creating table schema…';
+    fill.style.width = '10%';
+
+    const colDefs = cols.map(c => {
+      const t = _colTypes[c];
+      const safe = `"${c}"`;
+      const sqlType = t === 'number' ? 'DOUBLE' : t === 'date' ? 'VARCHAR' : t === 'boolean' ? 'VARCHAR' : 'VARCHAR';
+      return `${safe} ${sqlType}`;
+    }).join(', ');
+
+    await _conn.query(`DROP TABLE IF EXISTS raw_data`);
+    await _conn.query(`CREATE TABLE raw_data (${colDefs})`);
+    fill.style.width = '25%';
+
+    // Step 2 — batch insert
+    label.textContent = `Inserting ${rows.length.toLocaleString()} rows…`;
+    const BATCH = 5000;
+    const totalBatches = Math.ceil(rows.length / BATCH);
+
+    for (let b = 0; b < totalBatches; b++) {
+      const slice = rows.slice(b * BATCH, (b + 1) * BATCH);
+      const vals = slice.map(row =>
+        '(' + cols.map(c => {
+          const v = row[c];
+          if (v === null || v === '') return 'NULL';
+          return `'${String(v).replace(/'/g, "''")}'`;
+        }).join(', ') + ')'
+      ).join(',\n');
+
+      await _conn.query(`INSERT INTO raw_data VALUES ${vals}`);
+
+      const pct = 25 + Math.round(((b + 1) / totalBatches) * 65);
+      fill.style.width = pct + '%';
+      status.textContent = `Batch ${b+1}/${totalBatches} · ${Math.min((b+1)*BATCH, rows.length).toLocaleString()} rows inserted`;
+      // Yield to browser to allow UI update
+      await new Promise(r => setTimeout(r, 0));
+    }
+
+    // Step 3 — verify count
+    fill.style.width = '95%';
+    label.textContent = 'Verifying…';
+    const result = await _conn.query('SELECT COUNT(*) as n FROM raw_data');
+    const count = result.toArray()[0].n;
+    fill.style.width = '100%';
+
+    status.textContent = `✓ ${count.toLocaleString()} rows loaded into DuckDB`;
+    status.className = 'load-status ok';
+    label.textContent = 'Load complete';
+
+    // Show schema + SQL console
+    renderSchema(cols);
+    document.getElementById('schemaCard').classList.remove('hidden');
+    document.getElementById('sqlCard').classList.remove('hidden');
+    document.getElementById('proceedCard').classList.remove('hidden');
+
+    // Scroll to stage 2
+    document.getElementById('stage2').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  } catch (err) {
+    fill.style.width = '100%';
+    fill.style.background = '#E24B4A';
+    status.textContent = '✕ Error: ' + err.message;
+    status.className = 'load-status error';
+    label.textContent = 'Load failed';
+    console.error('DuckDB load error:', err);
+  }
+}
+
+function renderSchema(cols) {
+  const typeMap = {number:'DOUBLE', date:'VARCHAR', boolean:'VARCHAR', string:'VARCHAR', null:'VARCHAR'};
+  const colorMap = {number:'#5DCAA5', date:'#EF9F27', boolean:'#D85A30', string:'#7F77DD', null:'#a09e96'};
+  document.getElementById('schemaGrid').innerHTML = cols.map(c =>
+    `<div class="schema-col">
+      <div class="schema-name">${c}</div>
+      <div class="schema-type" style="color:${colorMap[_colTypes[c]]||'#a09e96'}">${typeMap[_colTypes[c]]||'VARCHAR'}</div>
+    </div>`
+  ).join('');
+}
+
+// ── SQL Console ───────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') runSQL();
+});
+
+async function runSQL() {
+  const sql = document.getElementById('sqlInput').value.trim();
+  if (!sql || !_conn) return;
+  const btn = document.getElementById('runSqlBtn');
+  btn.textContent = '⏳ Running…';
+  btn.disabled = true;
+  const out = document.getElementById('queryResults');
+  try {
+    const result = await _conn.query(sql);
+    const arr = result.toArray();
+    if (!arr.length) {
+      out.innerHTML = '<div class="alert ok">✓ Query executed — no rows returned</div>';
+    } else {
+      const keys = Object.keys(arr[0]).filter(k => k !== 'constructor');
+      const cols = result.schema.fields.map(f => f.name);
+      out.innerHTML = `
+        <div class="result-meta">${arr.length.toLocaleString()} row${arr.length!==1?'s':''} returned</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+            <tbody>${arr.slice(0,200).map(row =>
+              `<tr>${cols.map(c => {
+                const v = row[c];
+                const empty = v === null || v === undefined;
+                return `<td class="${empty?'null':''}">${empty?'null':String(v)}</td>`;
+              }).join('')}</tr>`).join('')}</tbody>
+          </table>
+        </div>
+        ${arr.length > 200 ? `<div style="font-family:var(--mono);font-size:11px;color:var(--hint);margin-top:6px">Showing first 200 of ${arr.length.toLocaleString()} rows</div>` : ''}`;
+    }
+  } catch (err) {
+    out.innerHTML = `<div class="alert error">✕ ${err.message}</div>`;
+  }
+  btn.textContent = '▶ Run SQL';
+  btn.disabled = false;
+}
+
+function setQuery(q) {
+  document.getElementById('sqlInput').value = q;
+  runSQL();
+}
+
+document.getElementById('runSqlBtn').addEventListener('click', runSQL);
+
+function proceedToStage3() {
+  alert('Stage 3 coming next! We will add SQL transforms to clean your data.');
+}
+
+// ── Boot ──────────────────────────────────────────────
+initDuckDB();
+</script>
 </body>
 </html>
